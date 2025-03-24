@@ -90,7 +90,8 @@ setup(
     #
     install_requires=[
         'cryptography>=1.4',
-        'iso8601>=0.1.11'
+        'iso8601>=0.1.11',
+        'pyperclip>=1.9.0' 
         ],
 
     # List additional groups of dependencies here (e.g. development

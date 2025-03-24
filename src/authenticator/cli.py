@@ -18,7 +18,7 @@ This implementation requires:
 import sys
 from authenticator.data import ClientData, ClientFile
 from authenticator.hotp import HOTP
-
+import pyperclip
 
 class DuplicateKeyError(KeyError):
     """Object with same key already exists in the collection."""
@@ -551,7 +551,7 @@ class CLI:
         if expiration_guard == most_recent_expiration:
             return None
         else:
-            return most_recent_expiration
+            return code_string, most_recent_expiration
 
     def _generate(self, id_pattern='*', refresh=5):
         """Generate and display the HOTP codes for the matching configurations.
@@ -578,13 +578,31 @@ class CLI:
             print("No HOTP/TOTP configurations found.", file=self.__stdout)
             return
         # Calculate the HOTPs
+
+        print()
+        for i, el in enumerate(cds_to_calc):
+            print("{}- {}".format(i, el.client_id()))
+
+        print()
+        print("Select a number between 0-{} to generate passkey.".format(len(cds_to_calc)-1))
+
+        target_idx = int(input())
+        if type(target_idx) == int and target_idx >=0 and target_idx <= (len(cds_to_calc)-1):
+            cds_to_calc = [cds_to_calc[target_idx]]
+        else:
+            pass
+
+        print()
+
         first_time = True
         keep_going = True
         while keep_going:
             if not first_time:
                 print("", file=self.__stdout)
             first_time = False
-            soonest_expiration = self._generate_once(cds_to_calc)
+            code_string, soonest_expiration = self._generate_once(cds_to_calc)
+            pyperclip.copy(code_string)
+
             if soonest_expiration is None:
                 # we only calculate counter-based HOTPs once
                 keep_going = False
